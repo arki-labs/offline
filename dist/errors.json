@@ -1,0 +1,83 @@
+[
+  {
+    "code": "offline.idempotency_store_unconfirmed",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "The database did not confirm that the response was cached. It may have been saved.",
+    "fix": "Reconcile the cache before retrying its write; never repeat the completed handler.",
+    "verify": "bun run test -- __tests__/orpc/idempotency.pglite.test.ts",
+    "source": "src/orpc/idempotency-failures.ts:10"
+  },
+  {
+    "code": "offline.query_cache_persist_failed",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "The persisted query cache could not be written to IndexedDB (storage full, private browsing, a blocked database, or a cache that cannot be serialized). The in-memory cache is unchanged.",
+    "fix": "Free browser storage or accept an in-memory-only cache for this session; the next write tries again.",
+    "verify": "bun run test -- __tests__/query/persist-now.test.ts",
+    "source": "src/query/failures.ts:9"
+  },
+  {
+    "code": "offline.queue_acceptance_unconfirmed",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "The queued mutation outcome could not be confirmed.",
+    "fix": "Reconcile this identity before retry; a write or remote effect may already exist.",
+    "verify": "bun run test -- __tests__/mutations/queue.test.ts",
+    "source": "src/mutations/failures.ts:23"
+  },
+  {
+    "code": "offline.queue_effect_unconfirmed",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "The server accepted the mutation, but local cleanup was not confirmed.",
+    "fix": "Reconcile the accepted server effect using the original idempotency identity.",
+    "verify": "bun run test -- __tests__/mutations/queue.test.ts __tests__/mutations/replay.test.ts __tests__/mutations/storage.test.ts",
+    "source": "src/mutations/failures.ts:64"
+  },
+  {
+    "code": "offline.queue_encoding_failure",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "Offline state could not be serialized.",
+    "fix": "Submit a serializable mutation input before retrying.",
+    "verify": "bun run test -- __tests__/mutations/queue.test.ts __tests__/mutations/replay.test.ts __tests__/mutations/storage.test.ts",
+    "source": "src/mutations/failures.ts:54"
+  },
+  {
+    "code": "offline.queue_persistence_unconfirmed",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "A local offline-state write was not confirmed.",
+    "fix": "Reconcile local state before retrying a write whose acknowledgement was lost.",
+    "verify": "bun run test -- __tests__/mutations/queue.test.ts __tests__/mutations/replay.test.ts __tests__/mutations/storage.test.ts",
+    "source": "src/mutations/failures.ts:44"
+  },
+  {
+    "code": "offline.queue_storage_corrupt",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "Stored offline data does not match its persistence contract.",
+    "fix": "Preserve the original bytes and repair or explicitly discard invalid local data.",
+    "verify": "bun run test -- __tests__/mutations/queue.test.ts __tests__/mutations/replay.test.ts __tests__/mutations/storage.test.ts",
+    "source": "src/mutations/failures.ts:34"
+  },
+  {
+    "code": "offline.queue_storage_unavailable",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "The existing offline queue could not be read.",
+    "fix": "Restore access to local storage before attempting another enqueue.",
+    "verify": "bun run test -- __tests__/mutations/queue.test.ts",
+    "source": "src/mutations/failures.ts:12"
+  },
+  {
+    "code": "offline.queue_transport_unavailable",
+    "package": "@arki/offline",
+    "kind": "failure",
+    "what": "The RPC transport is temporarily unavailable.",
+    "fix": "Restore connectivity; the queue owns retries using the original idempotency key.",
+    "verify": "bun run test -- __tests__/mutations/queue.test.ts __tests__/mutations/replay.test.ts __tests__/mutations/storage.test.ts",
+    "source": "src/mutations/failures.ts:75"
+  }
+]

@@ -1,0 +1,690 @@
+{
+  "package": "@arki/offline",
+  "version": "0.1.0",
+  "entries": [
+    {
+      "subpath": "./collections",
+      "name": "createLocalCollection",
+      "kind": "function",
+      "signature": "export declare function createLocalCollection<TSchema extends StandardSchemaV1, TKey extends string | number = string>(config: LocalCollectionConfig<TSchema, TKey>): Collection<InferSchemaOutput<TSchema>, TKey>;",
+      "jsdocSummary": "Creates a localStorage-backed TanStack DB collection with mandatory schema validation."
+    },
+    {
+      "subpath": "./collections",
+      "name": "createMemoryCollection",
+      "kind": "function",
+      "signature": "export declare function createMemoryCollection<TSchema extends StandardSchemaV1, TKey extends string | number = string>(config: MemoryCollectionConfig<TSchema, TKey>): Collection<InferSchemaOutput<TSchema>, TKey>;",
+      "jsdocSummary": "Creates an in-memory TanStack DB collection backed by `localOnlyCollectionOptions`."
+    },
+    {
+      "subpath": "./collections",
+      "name": "LocalCollectionConfig",
+      "kind": "type",
+      "signature": "export type LocalCollectionConfig<TSchema extends StandardSchemaV1, TKey extends string | number = string> = { storageKey: string; schema: TSchema; getKey: (item: InferSchemaOutput<TSchema>) => TKey; syncBetweenTabs?: boolean; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./collections",
+      "name": "MemoryCollectionConfig",
+      "kind": "type",
+      "signature": "export type MemoryCollectionConfig<TSchema extends StandardSchemaV1, TKey extends string | number = string> = { schema: TSchema; getKey: (item: InferSchemaOutput<TSchema>) => TKey; initialData?: InferSchemaOutput<TSchema>[]; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./devtools",
+      "name": "OfflineDevPanel",
+      "kind": "function",
+      "signature": "export declare function OfflineDevPanel(): ReactNode;",
+      "jsdocSummary": "Floating debug panel for inspecting the offline mutation queue."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "AnyRpcClient",
+      "kind": "type",
+      "signature": "export type AnyRpcClient = { call(procedurePath: readonly string[], input: unknown, headers?: Record<string, string>): Promise<unknown>; };",
+      "jsdocSummary": "Structural RPC client interface. Apps adapt their oRPC client to this shape."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "createDeadLetterStore",
+      "kind": "function",
+      "signature": "export declare function createDeadLetterStore(storageKey: string): DeadLetterStore;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "createOfflineMutationQueue",
+      "kind": "function",
+      "signature": "export declare function createOfflineMutationQueue(options: OfflineMutationQueueOptions): OfflineMutationQueue;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "createQueueStorage",
+      "kind": "function",
+      "signature": "export declare function createQueueStorage(storageKey: string): QueueStorage;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "createReplayLoop",
+      "kind": "function",
+      "signature": "export declare function createReplayLoop(options: ReplayLoopOptions): ReplayLoop;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "DeadLetterEntry",
+      "kind": "type",
+      "signature": "export type DeadLetterEntry = z.output<typeof deadLetterEntrySchema>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "DeadLetterStore",
+      "kind": "type",
+      "signature": "export type DeadLetterStore = { list(): Promise<readonly QueuedMutation[] | QueueStorageFailure>; add(entry: QueuedMutation, error: Error): Promise<void | QueueStorageFailure>; remove(id: QueuedMutationId): Promise<void | QueueStorageFailure>; subscribe(listener: () => void): () => void; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "DRAIN_FAILURES",
+      "kind": "variable",
+      "signature": "export declare const DRAIN_FAILURES: readonly [import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_unavailable\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_corrupt\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_persistence_unconfirmed\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_encoding_failure\", undefined>, import(\"@arki/failure\").FailureDefinition<\"failure.unexpected_defect\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_effect_unconfirmed\", import(\"@standard-schema/spec\").StandardSchemaV1<{ id: string; idempotencyKey: string; }, { id: string & z.$brand<\"offline.queued-mutation\">; idempotencyKey: string & z.$brand<\"offline.mutation-idempotency-key\">; }>>];",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "DrainFailure",
+      "kind": "type",
+      "signature": "export type DrainFailure = FailureOf<(typeof DRAIN_FAILURES)[number]>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "ENQUEUE_FAILURES",
+      "kind": "variable",
+      "signature": "export declare const ENQUEUE_FAILURES: readonly [import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_unavailable\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_corrupt\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_persistence_unconfirmed\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_encoding_failure\", undefined>, import(\"@arki/failure\").FailureDefinition<\"failure.unexpected_defect\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_acceptance_unconfirmed\", import(\"@standard-schema/spec\").StandardSchemaV1<{ id: string; idempotencyKey: string; }, { id: string & z.$brand<\"offline.queued-mutation\">; idempotencyKey: string & z.$brand<\"offline.mutation-idempotency-key\">; }>>, import(\"@arki/failure\").FailureDefinition<\"contracts.random_source_unavailable\", undefined>, import(\"@arki/failure\").FailureDefinition<\"failure.unexpected_defect\", undefined>];",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "EnqueueFailure",
+      "kind": "type",
+      "signature": "export type EnqueueFailure = FailureOf<(typeof ENQUEUE_FAILURES)[number]>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "EnqueueReceipt",
+      "kind": "type",
+      "signature": "export type EnqueueReceipt = z.output<typeof enqueueReceiptSchema>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "mutationIdempotencyKey",
+      "kind": "variable",
+      "signature": "export declare const mutationIdempotencyKey: import(\"@arki/contracts\").BrandedIdDeclaration<\"\", \"offline.mutation-idempotency-key\">;",
+      "jsdocSummary": "Transport deduplication identity, distinct from queue and server cache-record identities."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "MutationIdempotencyKey",
+      "kind": "type",
+      "signature": "export type MutationIdempotencyKey = IdOf<typeof mutationIdempotencyKey>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "OFFLINE_QUEUE_FAILURES",
+      "kind": "variable",
+      "signature": "export declare const OFFLINE_QUEUE_FAILURES: readonly [import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_unavailable\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_corrupt\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_persistence_unconfirmed\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_encoding_failure\", undefined>, import(\"@arki/failure\").FailureDefinition<\"failure.unexpected_defect\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_acceptance_unconfirmed\", import(\"@standard-schema/spec\").StandardSchemaV1<{ id: string; idempotencyKey: string; }, { id: string & z.$brand<\"offline.queued-mutation\">; idempotencyKey: string & z.$brand<\"offline.mutation-idempotency-key\">; }>>, import(\"@arki/failure\").FailureDefinition<\"contracts.random_source_unavailable\", undefined>, import(\"@arki/failure\").FailureDefinition<\"failure.unexpected_defect\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_effect_unconfirmed\", import(\"@standard-schema/spec\").StandardSchemaV1<{ id: string; idempotencyKey: string; }, { id: string & z.$brand<\"offline.queued-mutation\">; idempotencyKey: string & z.$brand<\"offline.mutation-idempotency-key\">; }>>];",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "OfflineMutationQueue",
+      "kind": "type",
+      "signature": "export type OfflineMutationQueue = { /** * Queue a call to an offline-safe procedure. `carrier` is its utils leaf * (`orpc.posts.create` from `createOrpcUtils`): it carries the procedure's * path, and the compiler accepts it only when the contract marked it * `offlineSafe`. The input is serialisable; the replay loop sends it back * through `rpc.call(path, input, headers)`. */ enqueue<Op extends OfflineSafeOperation>(carrier: Identified<Op>, input: InputOf<Op>): Promise<EnqueueReceipt | EnqueueFailure>; status(): QueueSnapshot; drain(): Promise<void | DrainFailure>; deadLetter: { list(): Promise<readonly QueuedMutation[] | QueueStorageFailure>; retry(id: QueuedMutationId): Promise<void | DrainFailure>; discard(id: QueuedMutationId): Promise<void | QueueStorageFailure>; }; subscribe(listener: (event: QueueEvent) => void): () => void; dispose(): void; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "OfflineMutationQueueOptions",
+      "kind": "type",
+      "signature": "export type OfflineMutationQueueOptions = { storageKey?: string; deadLetterStorageKey?: string; rpc: AnyRpcClient; /** * Who is signed in right now: their id, `null` when the session says nobody * is (signed out), or `undefined` while the session is not known yet (an * offline reload). Read at enqueue (the entry is bound to it) and right * before every send attempt. An id is remembered on the device as its last * actor; `null` forgets it; only `undefined` falls back to it. It must * answer synchronously from local state: it runs offline. */ actorId: () => string | null | undefined; /** * When to retry a send that failed for a transient reason (5xx, network), and after how many retries the * entry goes to the dead-letter store. Default: exponential from 1 s up to 30 s, at most 5 retries. */ retry?: Backoff; onDeadLetter?: (entry: QueuedMutation, error: Error) => void; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "OfflineQueueFailure",
+      "kind": "type",
+      "signature": "export type OfflineQueueFailure = FailureOf<(typeof OFFLINE_QUEUE_FAILURES)[number]>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "OfflineQueueProvider",
+      "kind": "function",
+      "signature": "export declare function OfflineQueueProvider({ queue, children, }: OfflineQueueProviderProps): React.JSX.Element;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "OfflineQueueProviderProps",
+      "kind": "type",
+      "signature": "export type OfflineQueueProviderProps = { queue: OfflineMutationQueue; children: ReactNode; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "OfflineSafeOperation",
+      "kind": "type",
+      "signature": "export type OfflineSafeOperation = Operation<unknown, unknown, unknown, OfflineSafeMeta>;",
+      "jsdocSummary": "An operation whose contract meta says `offlineSafe: true` (see `offlineSafe(p)` in `@arki/offline/orpc`)."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QUEUE_STORAGE_FAILURES",
+      "kind": "variable",
+      "signature": "export declare const QUEUE_STORAGE_FAILURES: readonly [import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_unavailable\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_corrupt\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_persistence_unconfirmed\", undefined>, import(\"@arki/failure\").FailureDefinition<\"offline.queue_encoding_failure\", undefined>, import(\"@arki/failure\").FailureDefinition<\"failure.unexpected_defect\", undefined>];",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueAcceptanceUnconfirmed",
+      "kind": "variable",
+      "signature": "export declare const QueueAcceptanceUnconfirmed: import(\"@arki/failure\").FailureDefinition<\"offline.queue_acceptance_unconfirmed\", import(\"@standard-schema/spec\").StandardSchemaV1<{ id: string; idempotencyKey: string; }, { id: string & z.$brand<\"offline.queued-mutation\">; idempotencyKey: string & z.$brand<\"offline.mutation-idempotency-key\">; }>>;",
+      "jsdocSummary": "The queued mutation outcome could not be confirmed."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueuedMutation",
+      "kind": "type",
+      "signature": "export type QueuedMutation = z.output<typeof queuedMutationSchema>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "queuedMutationId",
+      "kind": "variable",
+      "signature": "export declare const queuedMutationId: import(\"@arki/contracts\").BrandedIdDeclaration<\"\", \"offline.queued-mutation\">;",
+      "jsdocSummary": "Browser queue identity; the existing unprefixed Nano ID representation is unchanged."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueuedMutationId",
+      "kind": "type",
+      "signature": "export type QueuedMutationId = IdOf<typeof queuedMutationId>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueEffectUnconfirmed",
+      "kind": "variable",
+      "signature": "export declare const QueueEffectUnconfirmed: import(\"@arki/failure\").FailureDefinition<\"offline.queue_effect_unconfirmed\", import(\"@standard-schema/spec\").StandardSchemaV1<{ id: string; idempotencyKey: string; }, { id: string & z.$brand<\"offline.queued-mutation\">; idempotencyKey: string & z.$brand<\"offline.mutation-idempotency-key\">; }>>;",
+      "jsdocSummary": "The server accepted the mutation, but local cleanup was not confirmed."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueEncodingFailure",
+      "kind": "variable",
+      "signature": "export declare const QueueEncodingFailure: import(\"@arki/failure\").FailureDefinition<\"offline.queue_encoding_failure\", undefined>;",
+      "jsdocSummary": "Offline state could not be serialized."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueErrorCode",
+      "kind": "type",
+      "signature": "export type QueueErrorCode = NonNullable<QueuedMutation['lastError']>['code'];",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueEvent",
+      "kind": "type",
+      "signature": "export type QueueEvent = { type: 'enqueued'; entry: QueuedMutation; } | { type: 'sent'; entry: QueuedMutation; } | { type: 'dead-letter'; entry: QueuedMutation; error: Error; } | { type: 'failure'; failure: OfflineQueueFailure; } | { type: 'drained'; } | { type: 'auth-required'; } | { type: 'online'; } | { type: 'offline'; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueuePersistenceUnconfirmed",
+      "kind": "variable",
+      "signature": "export declare const QueuePersistenceUnconfirmed: import(\"@arki/failure\").FailureDefinition<\"offline.queue_persistence_unconfirmed\", undefined>;",
+      "jsdocSummary": "A local offline-state write was not confirmed."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueSnapshot",
+      "kind": "type",
+      "signature": "export type QueueSnapshot = { queued: number; sending: boolean; deadLettered: number; failure: OfflineQueueFailure | null; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueStatus",
+      "kind": "type",
+      "signature": "export type QueueStatus = ReturnType<OfflineMutationQueue['status']>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueStorage",
+      "kind": "type",
+      "signature": "export type QueueStorage = { read(): Promise<QueuedMutation[] | QueueStorageFailure>; write(entries: QueuedMutation[]): Promise<void | QueueStorageFailure>; clear(): Promise<void | QueueStorageFailure>; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueStorageCorrupt",
+      "kind": "variable",
+      "signature": "export declare const QueueStorageCorrupt: import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_corrupt\", undefined>;",
+      "jsdocSummary": "Stored offline data does not match its persistence contract."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueStorageFailure",
+      "kind": "type",
+      "signature": "export type QueueStorageFailure = FailureOf<(typeof QUEUE_STORAGE_FAILURES)[number]>;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueStorageUnavailable",
+      "kind": "variable",
+      "signature": "export declare const QueueStorageUnavailable: import(\"@arki/failure\").FailureDefinition<\"offline.queue_storage_unavailable\", undefined>;",
+      "jsdocSummary": "The existing offline queue could not be read."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "QueueTransportUnavailable",
+      "kind": "variable",
+      "signature": "export declare const QueueTransportUnavailable: import(\"@arki/failure\").FailureDefinition<\"offline.queue_transport_unavailable\", undefined>;",
+      "jsdocSummary": "The RPC transport is temporarily unavailable."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "ReplayLoop",
+      "kind": "type",
+      "signature": "export type ReplayLoop = { start(): void; stop(): void; drainNow(): Promise<void | DrainFailure>; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "ReplayLoopOptions",
+      "kind": "type",
+      "signature": "export type ReplayLoopOptions = { storage: QueueStorage; dlStore: DeadLetterStore; rpc: AnyRpcClient; /** Who is signed in now (`null`: nobody; `undefined`: not known yet). Read right before every send attempt. */ actorId: () => string | null | undefined; /** * When to retry a send that failed for a transient reason (5xx, network), and when to give up and * dead-letter the entry. `retry.delay(n, ...)` is the wait before retry `n`; `undefined` ends the retries. */ retry: Backoff; onDeadLetter?: (entry: QueuedMutation, error: Error) => void; onStateChange: (sending: boolean) => void; emit: (event: QueueEvent) => void; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "useOfflineMutation",
+      "kind": "function",
+      "signature": "export declare function useOfflineMutation<Op extends OfflineSafeOperation>(carrier: Identified<Op>): UseOfflineMutationResult<InputOf<Op>>;",
+      "jsdocSummary": "Queue calls to an offline-safe procedure. Pass its utils leaf from `createOrpcUtils` — `useOfflineMutation(orpc.posts.create)`. It compiles only when the contract marked the procedure `offlineSafe(p)`; the input type comes from the contract. The replay loop sends each call with an `Idempotency-Key`, which the server's `idempotency(repo)` middleware uses to dedupe replays."
+    },
+    {
+      "subpath": "./mutations",
+      "name": "UseOfflineMutationResult",
+      "kind": "type",
+      "signature": "export type UseOfflineMutationResult<TInput> = { readonly mutate: (input: TInput) => Promise<EnqueueReceipt | EnqueueFailure>; readonly isQueued: boolean; readonly isPending: boolean; readonly failure: OfflineQueueFailure | null; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "useOfflineQueue",
+      "kind": "function",
+      "signature": "export declare function useOfflineQueue(): OfflineQueueContextValue;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./mutations",
+      "name": "useQueueStatus",
+      "kind": "function",
+      "signature": "export declare function useQueueStatus(): QueueStatus;",
+      "jsdocSummary": "Subscribes to queue events and returns a live status snapshot. Uses useSyncExternalStore for React 18+ concurrent-mode correctness."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "createIdempotencyTable",
+      "kind": "function",
+      "signature": "export declare function createIdempotencyTable<D extends Dialect>(c: ColumnKit<D>): import(\"@arki/db/columns\").TableOf<D, \"offline_idempotency_keys\", { id: import(\"@arki/db/columns\").ColumnSpec<D, \"varchar\", Omit<import(\"@arki/db/columns\").NoFlags & { notNull: true; } & { primaryKey: true; }, \"type\"> & { type: `idk_${string}` & import(\"zod\").$brand<\"offline.idempotency-record\">; }>; idempotencyKey: import(\"@arki/db/columns\").ColumnSpec<D, \"varchar\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; procedurePath: import(\"@arki/db/columns\").ColumnSpec<D, \"varchar\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; userId: import(\"@arki/db/columns\").ColumnSpec<D, \"text\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; responseJson: import(\"@arki/db/columns\").ColumnSpec<D, \"json\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; createdAt: import(\"@arki/db/columns\").ColumnSpec<D, \"timestamp\", import(\"@arki/db/columns\").NoFlags & { notNull: true; } & { default: true; }>; expiresAt: import(\"@arki/db/columns\").ColumnSpec<D, \"timestamp\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; }>;",
+      "jsdocSummary": "The idempotency table, written once for every dialect. Pass `pgColumns(schema)` from `@arki/db/pg` or `sqliteColumns()` from `@arki/db/sqlite`. This file imports no dialect runtime."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "idempotency",
+      "kind": "function",
+      "signature": "export declare function idempotency(repo: IdempotencyStore): Middleware<IdempotentContext, Record<never, never>, unknown, unknown, ORPCErrorConstructorMap<Record<never, never>>, Meta>;",
+      "jsdocSummary": "oRPC middleware that deduplicates replayed offline mutations. Install it ONCE where the app builds its implementer:"
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IDEMPOTENCY_STORE_FAILURES",
+      "kind": "variable",
+      "signature": "export declare const IDEMPOTENCY_STORE_FAILURES: readonly [import(\"@arki/failure\").FailureDefinition<\"offline.idempotency_store_unconfirmed\", undefined>, import(\"@arki/failure\").FailureDefinition<\"contracts.random_source_unavailable\", undefined>, import(\"@arki/failure\").FailureDefinition<\"failure.unexpected_defect\", undefined>];",
+      "jsdocSummary": "Exact failures returned by response-cache writes, including generation defects."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IdempotencyDatabase",
+      "kind": "type",
+      "signature": "export type IdempotencyDatabase = PgAsyncDatabase<PgQueryResultHKT, AnyRelations>;",
+      "jsdocSummary": "Any async Postgres drizzle database: node-postgres in production, PGlite in tests and local runs."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "idempotencyKeyId",
+      "kind": "variable",
+      "signature": "export declare const idempotencyKeyId: import(\"@arki/contracts\").BrandedIdDeclaration<\"idk_\", \"offline.idempotency-record\">;",
+      "jsdocSummary": "Stored cache-record identity; distinct from the client's idempotency token."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IdempotencyKeyId",
+      "kind": "type",
+      "signature": "export type IdempotencyKeyId = IdOf<typeof idempotencyKeyId>;",
+      "jsdocSummary": "Inferred from the canonical record schema; stored prefixes remain compatible."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "idempotencyKeys",
+      "kind": "variable",
+      "signature": "export declare const idempotencyKeys: import(\"@arki/db/pg\").PgTableOf<\"offline_idempotency_keys\", { id: import(\"@arki/db/columns\").ColumnSpec<\"pg\", \"varchar\", Omit<import(\"@arki/db/columns\").NoFlags & { notNull: true; } & { primaryKey: true; }, \"type\"> & { type: `idk_${string}` & import(\"zod\").$brand<\"offline.idempotency-record\">; }>; idempotencyKey: import(\"@arki/db/columns\").ColumnSpec<\"pg\", \"varchar\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; procedurePath: import(\"@arki/db/columns\").ColumnSpec<\"pg\", \"varchar\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; userId: import(\"@arki/db/columns\").ColumnSpec<\"pg\", \"text\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; responseJson: import(\"@arki/db/columns\").ColumnSpec<\"pg\", \"json\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; createdAt: import(\"@arki/db/columns\").ColumnSpec<\"pg\", \"timestamp\", import(\"@arki/db/columns\").NoFlags & { notNull: true; } & { default: true; }>; expiresAt: import(\"@arki/db/columns\").ColumnSpec<\"pg\", \"timestamp\", import(\"@arki/db/columns\").NoFlags & { notNull: true; }>; }>;",
+      "jsdocSummary": "The idempotency table in Postgres's default schema. For another schema, call `createIdempotencyTable(pgColumns(schema))`."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IdempotencyKeysTable",
+      "kind": "type",
+      "signature": "export type IdempotencyKeysTable = ReturnType<typeof createIdempotencyTable<'pg'>>;",
+      "jsdocSummary": "The Postgres idempotency table, in any schema."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IdempotencyRepository",
+      "kind": "class",
+      "signature": "export declare class IdempotencyRepository { private readonly db; private readonly table; constructor(db: IdempotencyDatabase, table: IdempotencyKeysTable); find(key: string, path: string, userId: string): Promise<unknown>; /** Cache a completed response; a failure never authorizes re-running its handler. */ store(key: string, path: string, userId: string, response: unknown): Promise<void | IdempotencyStoreFailure>; }",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IdempotencyStore",
+      "kind": "type",
+      "signature": "export type IdempotencyStore = Pick<IdempotencyRepository, 'find' | 'store'>;",
+      "jsdocSummary": "The two calls the middleware makes. `IdempotencyRepository` is the Postgres one, `SqliteIdempotencyRepository` the SQLite one."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IdempotencyStoreFailure",
+      "kind": "type",
+      "signature": "export type IdempotencyStoreFailure = FailureOf<(typeof IDEMPOTENCY_STORE_FAILURES)[number]>;",
+      "jsdocSummary": "Derived once from the canonical definitions."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IdempotencyStoreUnconfirmed",
+      "kind": "variable",
+      "signature": "export declare const IdempotencyStoreUnconfirmed: import(\"@arki/failure\").FailureDefinition<\"offline.idempotency_store_unconfirmed\", undefined>;",
+      "jsdocSummary": "The database did not confirm that the response was cached. It may have been saved."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "IdempotentContext",
+      "kind": "type",
+      "signature": "export type IdempotentContext = { readonly headers: Headers; readonly session: { readonly user: { readonly id: string; }; } | null | undefined; };",
+      "jsdocSummary": "What the middleware reads from the request context."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "offlineSafe",
+      "kind": "function",
+      "signature": "export declare function offlineSafe<I extends AnySchema, O extends AnySchema, E extends ErrorMap, M extends Meta>(procedure: ContractProcedure<I, O, E, M>): ContractProcedure<I, O, E, M & OfflineSafeMeta>;",
+      "jsdocSummary": "Mark a contract procedure safe to queue offline. This is the only way to get `offlineSafe: true` into the meta TYPE: `.meta({ offlineSafe: true })` keeps the meta type the builder declared, so the compiler could never see it."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "OfflineSafeMeta",
+      "kind": "type",
+      "signature": "export type OfflineSafeMeta = { readonly offlineSafe: true; };",
+      "jsdocSummary": "Meta of a contract procedure that is safe to queue offline and replay."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "SqliteIdempotencyDatabase",
+      "kind": "type",
+      "signature": "export type SqliteIdempotencyDatabase = Pick<SQLiteAsyncDatabase<'async', unknown, AnyRelations>, 'select' | 'insert'>;",
+      "jsdocSummary": "Any async SQLite drizzle database (libSQL) or transaction — only what the repository uses."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "SqliteIdempotencyKeysTable",
+      "kind": "type",
+      "signature": "export type SqliteIdempotencyKeysTable = ReturnType<typeof createIdempotencyTable<'sqlite'>>;",
+      "jsdocSummary": "The SQLite idempotency table."
+    },
+    {
+      "subpath": "./orpc",
+      "name": "SqliteIdempotencyRepository",
+      "kind": "class",
+      "signature": "export declare class SqliteIdempotencyRepository { private readonly db; private readonly table; constructor(db: SqliteIdempotencyDatabase, table: SqliteIdempotencyKeysTable); find(key: string, path: string, userId: string): Promise<unknown>; /** Cache a completed response; a failure never authorizes re-running its handler. */ store(key: string, path: string, userId: string, response: unknown): Promise<void | IdempotencyStoreFailure>; }",
+      "jsdocSummary": "The SQLite twin of `IdempotencyRepository`: same cache, same 7-day window, SQLite's own query builders."
+    },
+    {
+      "subpath": "./preset",
+      "name": "CacheOnlyConfig",
+      "kind": "type",
+      "signature": "export type CacheOnlyConfig = { tier: 'cache-only'; appId: string; buster?: string; devtools?: boolean; /** Forwarded to the underlying QueryClient — wire SuperJSON / staleTime / dehydration filters here. */ queryDefaults?: DefaultOptions; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./preset",
+      "name": "createOfflineRuntime",
+      "kind": "function",
+      "signature": "export declare function createOfflineRuntime(config: OfflineRuntimeConfig): OfflineRuntime;",
+      "jsdocSummary": "Creates a fully-wired offline runtime in a single call."
+    },
+    {
+      "subpath": "./preset",
+      "name": "OfflineRuntime",
+      "kind": "type",
+      "signature": "export type OfflineRuntime = { /** * The browser's one persisted QueryClient. Browser only: reading it on the server throws, because a * module-level client there would be one cache shared by every request. On the server each render of * `Provider` gets its own client; read it with `useQueryClient()`. */ queryClient: QueryClient; /** * Writes the persisted query cache to IndexedDB now and resolves when it is stored. After removing * a query that must not come back (a deleted item), await it before the page can reload: the * automatic writes are throttled to one a second. Resolves `offline.query_cache_persist_failed` when * IndexedDB refuses the write. Browser only: on the server it rejects. */ persistNow: () => Promise<void | ReturnType<typeof QueryCachePersistFailed>>; queue?: OfflineMutationQueue; /** Stops the queue's replay loop and removes its window listeners. Call it when the runtime is torn down (tests, hot reload). */ dispose: () => void; /** In the browser: the persisted client. On the server: a fresh client for each request, never persisted. */ Provider: (props: { children: ReactNode; }) => ReactNode; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./preset",
+      "name": "OfflineRuntimeConfig",
+      "kind": "type",
+      "signature": "export type OfflineRuntimeConfig = CacheOnlyConfig | QueueConfig;",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./preset",
+      "name": "QueueConfig",
+      "kind": "type",
+      "signature": "export type QueueConfig = { tier: 'queue'; appId: string; rpc: AnyRpcClient; /** Who is signed in now (`null`: signed out; `undefined`: not known yet). Queued writes replay only under the actor that queued them. */ actorId: () => string | null | undefined; buster?: string; devtools?: boolean; /** Forwarded to the underlying QueryClient — wire SuperJSON / staleTime / dehydration filters here. */ queryDefaults?: DefaultOptions; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./pwa",
+      "name": "ApiRouteConfig",
+      "kind": "type",
+      "signature": "export type ApiRouteConfig = { urlPattern: RegExp; strategy: 'networkFirst' | 'staleWhileRevalidate'; maxAgeSeconds?: number; cacheName?: string; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./pwa",
+      "name": "AppShellConfig",
+      "kind": "type",
+      "signature": "export type AppShellConfig = { strategy?: 'networkFirst' | 'staleWhileRevalidate'; maxAgeSeconds?: number; cacheName?: string; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./pwa",
+      "name": "createStrategy",
+      "kind": "function",
+      "signature": "export declare function createStrategy(strategy: FetchStrategy, config: StrategyConfig): NetworkFirst | StaleWhileRevalidate | CacheFirst;",
+      "jsdocSummary": "Creates a Workbox strategy handler from a named strategy + config."
+    },
+    {
+      "subpath": "./pwa",
+      "name": "FetchStrategy",
+      "kind": "type",
+      "signature": "export type FetchStrategy = 'networkFirst' | 'staleWhileRevalidate' | 'cacheFirst';",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./pwa",
+      "name": "registerOfflineRoutes",
+      "kind": "function",
+      "signature": "export declare function registerOfflineRoutes(options?: RegisterOfflineRoutesOptions): void;",
+      "jsdocSummary": "Registers Workbox fetch strategies for app shell, API routes, and static assets."
+    },
+    {
+      "subpath": "./pwa",
+      "name": "RegisterOfflineRoutesOptions",
+      "kind": "type",
+      "signature": "export type RegisterOfflineRoutesOptions = { appShell?: AppShellConfig; apiRoutes?: ApiRouteConfig[]; staticAssets?: StaticAssetConfig[]; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./pwa",
+      "name": "StaticAssetConfig",
+      "kind": "type",
+      "signature": "export type StaticAssetConfig = { urlPattern: RegExp; strategy?: Extract<FetchStrategy, 'cacheFirst' | 'staleWhileRevalidate'>; cacheName?: string; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./pwa",
+      "name": "StrategyConfig",
+      "kind": "type",
+      "signature": "export type StrategyConfig = { cacheName: string; maxAgeSeconds?: number; maxEntries?: number; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./query",
+      "name": "createIdbPersister",
+      "kind": "function",
+      "signature": "export declare function createIdbPersister(options?: CreateIdbPersisterOptions): IdbPersister;",
+      "jsdocSummary": "Creates an async storage persister backed by IndexedDB via idb-keyval."
+    },
+    {
+      "subpath": "./query",
+      "name": "CreateIdbPersisterOptions",
+      "kind": "type",
+      "signature": "export type CreateIdbPersisterOptions = { /** * The key used to store the persisted QueryClient cache in IndexedDB. * @default 'arki-offline-query' */ storageKey?: string; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./query",
+      "name": "createPersistedQueryClient",
+      "kind": "function",
+      "signature": "export declare function createPersistedQueryClient(options?: CreatePersistedQueryClientOptions): PersistedQueryClient;",
+      "jsdocSummary": "Creates a TanStack QueryClient paired with an IndexedDB-backed persister."
+    },
+    {
+      "subpath": "./query",
+      "name": "CreatePersistedQueryClientOptions",
+      "kind": "type",
+      "signature": "export type CreatePersistedQueryClientOptions = { /** * The key used to store the persisted QueryClient cache in IndexedDB. * @default 'arki-offline-query' */ storageKey?: string; /** * Maximum age of the persisted cache in milliseconds. Caches older than * this will be discarded on restore. * @default 86_400_000 (24 hours) */ maxAge?: number; /** * A buster string that, when changed, invalidates any previously persisted * cache. Defaults to `import.meta.env.VITE_BUILD_ID` so a new deploy * automatically busts stale caches. * @default import.meta.env.VITE_BUILD_ID ?? '' */ buster?: string; /** * Default options forwarded to the QueryClient constructor. */ defaultOptions?: DefaultOptions; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./query",
+      "name": "IdbPersister",
+      "kind": "type",
+      "signature": "export type IdbPersister = Persister & { /** * Writes `client` now and resolves when it is stored. `persistClient` is throttled to one write a * second and does not say when it finishes; a page that reloads right after a delete would restore * the older snapshot. Resolves `offline.query_cache_persist_failed` when IndexedDB refuses (storage * full, private mode) or the cache cannot be serialized. */ persistClientNow: (client: PersistedClient) => Promise<void | ReturnType<typeof QueryCachePersistFailed>>; };",
+      "jsdocSummary": "A persister that can also write the cache at once, for callers that must know the write is done."
+    },
+    {
+      "subpath": "./query",
+      "name": "PersistedQueryClient",
+      "kind": "type",
+      "signature": "export type PersistedQueryClient = { queryClient: QueryClient; persister: IdbPersister; /** * Writes the whole cache to IndexedDB now and resolves when it is stored. Await it after removing * a query that must never come back (a deleted item) and before the page can reload; the * provider's own writes are throttled to one a second. */ persistNow: () => Promise<void | ReturnType<typeof QueryCachePersistFailed>>; /** Resolved buster string — forward to `PersistedQueryClientProvider`. */ buster: string; /** Resolved max age in ms — forward to `PersistedQueryClientProvider`. */ maxAge: number; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./query",
+      "name": "PersistedQueryClientProvider",
+      "kind": "function",
+      "signature": "export declare function PersistedQueryClientProvider({ client, persister, maxAge, buster, dehydrateOptions, children, }: PersistedQueryClientProviderProps): React.JSX.Element;",
+      "jsdocSummary": "Thin wrapper around `PersistQueryClientProvider` that accepts a pre-built `client` + `persister` pair (from `createPersistedQueryClient`) and forwards the optional `maxAge` and `buster` into `persistOptions`."
+    },
+    {
+      "subpath": "./query",
+      "name": "PersistedQueryClientProviderProps",
+      "kind": "type",
+      "signature": "export type PersistedQueryClientProviderProps = { /** The QueryClient instance created by `createPersistedQueryClient`. */ client: QueryClient; /** The persister instance created by `createPersistedQueryClient`. */ persister: Persister; /** * Maximum age of the persisted cache in milliseconds. Caches older than * this will be discarded on restore. * @default 86_400_000 (24 hours) */ maxAge?: number; /** * A buster string that, when changed, invalidates any previously persisted * cache. */ buster?: string; /** * Controls which queries are written to the PERSISTENT store, independent of * the QueryClient's SSR `dehydrate` default. Forward a `{ shouldDehydrateQuery }` * here to persist offline-relevant queries WITHOUT pulling them into the SSR * payload. This decoupling matters because SSR dehydration and offline * persistence both flow through the same `dehydrate()`: an app whose * client-level `shouldDehydrateQuery` is a restrictive allow-list (tuned for * SSR serialization safety) would otherwise silently persist nothing — the * offline cache stays empty. Omit to fall back to the client default. */ dehydrateOptions?: PersistDehydrateOptions; children: ReactNode; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./query",
+      "name": "QueryCachePersistFailed",
+      "kind": "variable",
+      "signature": "export declare const QueryCachePersistFailed: import(\"@arki/failure\").FailureDefinition<\"offline.query_cache_persist_failed\", undefined>;",
+      "jsdocSummary": "The persisted query cache could not be written to IndexedDB (storage full, private browsing, a blocked database, or a cache that cannot be serialized). The in-memory cache is unchanged."
+    },
+    {
+      "subpath": "./query",
+      "name": "useIsRestoring",
+      "kind": "variable",
+      "signature": "export declare const useIsRestoring: () => boolean;",
+      "jsdocSummary": "If you are using `PersistQueryClientProvider`, you can also use the `useIsRestoring` hook alongside it to check if a restore is currently in progress. `useQuery` and friends also check this internally to avoid race conditions between the restore and mounting queries."
+    },
+    {
+      "subpath": "./status",
+      "name": "OfflineBanner",
+      "kind": "function",
+      "signature": "export declare function OfflineBanner({ children }: OfflineBannerProps): ReactNode;",
+      "jsdocSummary": "Headless render-prop component that exposes offline + queue state to the caller."
+    },
+    {
+      "subpath": "./status",
+      "name": "OfflineBannerProps",
+      "kind": "type",
+      "signature": "export type OfflineBannerProps = { children: (state: OfflineBannerState) => ReactNode; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./status",
+      "name": "OfflineBannerState",
+      "kind": "type",
+      "signature": "export type OfflineBannerState = { online: boolean; queued: number; deadLettered: number; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./status",
+      "name": "OnlineStatus",
+      "kind": "type",
+      "signature": "export type OnlineStatus = { online: boolean; lastChange: number; };",
+      "jsdocSummary": ""
+    },
+    {
+      "subpath": "./status",
+      "name": "useOnlineStatus",
+      "kind": "function",
+      "signature": "export declare function useOnlineStatus(): OnlineStatus;",
+      "jsdocSummary": "Returns the current online status and the timestamp of the last change."
+    },
+    {
+      "subpath": "./status",
+      "name": "useQueueDepth",
+      "kind": "function",
+      "signature": "export declare function useQueueDepth(): number;",
+      "jsdocSummary": "Convenience hook returning the number of mutations currently in the queue."
+    }
+  ],
+  "groups": [],
+  "errorCodes": [
+    "offline.idempotency_store_unconfirmed",
+    "offline.query_cache_persist_failed",
+    "offline.queue_acceptance_unconfirmed",
+    "offline.queue_effect_unconfirmed",
+    "offline.queue_encoding_failure",
+    "offline.queue_persistence_unconfirmed",
+    "offline.queue_storage_corrupt",
+    "offline.queue_storage_unavailable",
+    "offline.queue_transport_unavailable"
+  ]
+}
