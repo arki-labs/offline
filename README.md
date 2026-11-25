@@ -1,4 +1,4 @@
-Read-only mirror of `@arki/offline` v0.1.0. Source and issues: arki-labs/arki. Docs: https://arki.dev/packages/offline. Published 2026-11-03 with provenance https://www.npmjs.com/package/@arki/offline/v/0.1.0#provenance.
+Read-only mirror of `@arki/offline` v0.2.0. Source and issues: arki-labs/arki. Docs: https://arki.dev/packages/offline. Published 2026-11-25 with provenance https://www.npmjs.com/package/@arki/offline/v/0.2.0#provenance.
 
 # @arki/offline
 
@@ -14,6 +14,62 @@ Offline-first toolkit for @arki apps. Modular subpath exports — install what y
 @arki/offline/devtools    — floating debug panel (dev-only, zero production cost)
 @arki/offline/preset      — one-liner createOfflineRuntime() that wires everything
 ```
+
+---
+
+## Install
+
+```sh
+npm install @arki/offline
+# or
+bun add @arki/offline
+# or
+pnpm add @arki/offline
+```
+
+Peer dependencies: `@tanstack/react-query`, `react`, `@orpc/contract` and `@orpc/server`. `@arki/db` and `drizzle-orm` are for the SQL idempotency store of `@arki/offline/orpc`.
+
+## Quick start
+
+Keep reads across reloads (Tier 1). Persist the TanStack Query cache to IndexedDB.
+
+```ts
+import { createIdbPersister } from '@arki/offline/query';
+
+export const idbPersister = createIdbPersister({ storageKey: 'pizzeria-query' });
+```
+
+The persister needs IndexedDB, so it works in a browser. [Three tiers](#three-tiers) shows how to mount it, queue writes (Tier 2) and wire everything with `createOfflineRuntime()`.
+
+## When not to use this
+
+- You build for React Native and need a persisted query cache or a write queue. Use TanStack's own offline stack there. See [React Native](#react-native).
+- You need true local-first sync with conflict resolution. This package has Tier 1 and Tier 2. Tier 3 is not built.
+- Your writes cannot run twice with the same result. A replayed write can run twice, so a handler must be idempotent.
+
+## Runtime support
+
+`@arki/offline/collections` runs on every engine, Hermes (React Native) included, once the app installs a random source (see [React Native](#react-native)). `./query`, `./mutations`, `./preset`, `./status` and `./devtools` run on Node, Bun, Deno and browsers, not Hermes: they store to IndexedDB, listen to browser `online`/`offline` events, or render DOM elements, and React Native has none of these. `@arki/offline/orpc` runs on Node, Bun, Deno and browsers, not Hermes: oRPC needs Web Streams (`TransformStream`), which React Native lacks. `@arki/offline/pwa` runs in browsers only: Workbox reads the worker global `self`.
+
+The Hermes leg sets the globals React Native sets before it imports `./collections`: `window` and `self` are the global object, and `navigator` is `{ product: 'ReactNative' }`, with no `onLine` and no events. So a guard that takes `window` for a browser fails there as it would in an app.
+
+<!-- runtimes:start -->
+| Runtime | Result | Version tested | Date (UTC) |
+| --- | --- | --- | --- |
+| node | pass | v22.13.1 | 2026-11-05 |
+| bun | pass | 1.4.2 | 2026-11-05 |
+| deno | pass | 2.9.8 | 2026-11-05 |
+| browser | pass | Chromium 156.0.8078.4 | 2026-11-05 |
+| hermes | pass | V1 250829098.0.17 | 2026-11-05 |
+
+- `./devtools` runs on node, bun, deno, browser (`scripts/smoke/devtools.mjs`).
+- `./mutations` runs on node, bun, deno, browser (`scripts/smoke/mutations.mjs`).
+- `./orpc` runs on node, bun, deno, browser (`scripts/smoke/orpc.mjs`).
+- `./preset` runs on node, bun, deno, browser (`scripts/smoke/preset.mjs`).
+- `./pwa` runs on browser, bundled (bundler-only entry) (`scripts/smoke/pwa.mjs`).
+- `./query` runs on node, bun, deno, browser (`scripts/smoke/query.mjs`).
+- `./status` runs on node, bun, deno, browser (`scripts/smoke/status.mjs`).
+<!-- runtimes:end -->
 
 ---
 
@@ -372,3 +428,119 @@ The enqueue boundary emits `offline.queue.enqueue` under the active OTel context
 `QueueStorageCorrupt` preserves invalid stored bytes. `QueuePersistenceUnconfirmed` requires reading local state before repeating a local write. `QueueEffectUnconfirmed` carries the identity of a remotely accepted effect whose cleanup needs reconciliation. Unknown adapter defects stop replay as `UnexpectedDefect`; mark a known network outage with `QueueTransportUnavailable()` so the queue can own its retries. HTTP status refusals retain auth/4xx/5xx policy. An explicit drain resumes an authentication halt.
 
 Background failures reach queue events and `queue.status().failure`; hooks and devtools preserve/display them. Storage, actor persistence, dead-letter operations and drain have default spans under the active context. Query persistence, collections, PWA and runtime capabilities remain separate T08 export audits. This is not package-wide completion.
+
+## React Native
+
+On React Native, use TanStack's own offline stack for the query cache and the write queue. `@arki/offline` gives you `./collections` there, and `./orpc` on your server.
+
+| Need | Use on React Native | Version (npm, 2026-11-05) |
+| --- | --- | --- |
+| Persisted query cache | `createAsyncStoragePersister` from `@tanstack/query-async-storage-persister`, over `@react-native-async-storage/async-storage` or the default export of `expo-sqlite/kv-store` | 5.106.1; AsyncStorage 3.1.1; expo-sqlite 58.0.15 (Expo SDK 58) |
+| Online state for queries | TanStack Query `onlineManager.setEventListener`, wired to `expo-network` (`addNetworkStateListener`, plus `getNetworkStateAsync` at start) | expo-network 58.0.4 |
+| Refetch on focus | `focusManager.setFocused(state === 'active')` on `AppState` `change` events (`react-native`) | the app's React Native |
+| Queued writes | `@tanstack/offline-transactions/react-native`: the outbox with a NetInfo + `AppState` online detector; you give it a storage adapter (the TanStack guide shows one over AsyncStorage) | 1.2.0; needs `@tanstack/db` `^1.0.0-rc.0` and `@react-native-community/netinfo` `>=11` (12.0.1) |
+| Random source for TanStack DB | `react-native-get-random-values`, imported once at the top of `index.js` | 2.1.0 |
+
+`@arki/offline/query`, `./mutations`, `./preset`, `./status` and `./devtools` are web-only (they need IndexedDB, browser events or the DOM). An accidental import of `./status` or `./mutations` in a React Native app does not crash. `./status` loads and reports online, since React Native's `navigator` has no `onLine`. The queue loads too, but every enqueue returns the typed failure `offline.queue_storage_unavailable` (there is no IndexedDB), and nothing is sent.
+
+What `@arki/offline` provides on React Native:
+
+- `@arki/offline/collections`: `createMemoryCollection` works once `react-native-get-random-values` is imported. Without a random source TanStack DB refuses to build the collection ("No secure random number generator available"). `createLocalCollection` keeps its rows in the global `localStorage` when one exists, for example after `import 'expo-sqlite/localStorage/install'`, and otherwise in memory only, as on a server. It never listens for cross-tab `storage` events on React Native. The Hermes smoke proves this with a stand-in `localStorage`, not with `expo-sqlite` itself.
+- `@arki/offline/orpc` on the server: `idempotency()` stores the first answer for each `Idempotency-Key`. Send the key TanStack's offline transaction gives your mutation as that header, so a replayed write runs once.
+
+```ts skip="fragment: needs a React Native app with expo-network and AsyncStorage installed"
+// index.js — first line, before anything that builds a TanStack DB collection.
+import 'react-native-get-random-values';
+
+// App setup.
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { focusManager, onlineManager } from '@tanstack/react-query';
+import * as Network from 'expo-network';
+import { AppState } from 'react-native';
+
+export const persister = createAsyncStoragePersister({ storage: AsyncStorage });
+
+onlineManager.setEventListener(setOnline => {
+  void Network.getNetworkStateAsync().then(state => setOnline(state.isConnected === true));
+  const subscription = Network.addNetworkStateListener(state => setOnline(state.isConnected === true));
+  return () => subscription.remove();
+});
+
+AppState.addEventListener('change', state => focusManager.setFocused(state === 'active'));
+```
+
+
+## Public imports
+
+| Import                      | What it holds                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `@arki/offline/query`       | Persisted query client: `createIdbPersister`, `PersistedQueryClientProvider`, `createPersistedQueryClient`. |
+| `@arki/offline/mutations`   | The write queue, its replay loop, dead-letter store, hooks and the queue failures.                     |
+| `@arki/offline/collections` | `createLocalCollection`, `createMemoryCollection`.                                                      |
+| `@arki/offline/pwa`         | Workbox helpers for a service worker: `registerOfflineRoutes`, `createStrategy`.                       |
+| `@arki/offline/status`      | `useOnlineStatus`, `useQueueDepth`, `OfflineBanner`.                                                   |
+| `@arki/offline/orpc`        | `offlineSafe`, the `idempotency()` middleware and the idempotency stores.                              |
+| `@arki/offline/devtools`    | `OfflineDevPanel`, for development.                                                                    |
+| `@arki/offline/preset`      | `createOfflineRuntime()`, which wires the other entries.                                               |
+
+There is no root entry. [`docs/api.md`](docs/api.md) lists every export.
+
+## Failure behaviour
+
+Operations return failures as values. Check them with `isFailure` from `@arki/failure`. Match on `code`, never on the message.
+
+| Code                                    | When                                                                        |
+| --------------------------------------- | --------------------------------------------------------------------------- |
+| `offline.query_cache_persist_failed`    | IndexedDB refused a cache write (storage full, private mode).               |
+| `offline.queue_storage_unavailable`     | The existing queue could not be read, or there is no IndexedDB.             |
+| `offline.queue_storage_corrupt`         | Stored queue bytes do not match their contract. They are kept, not erased.  |
+| `offline.queue_encoding_failure`        | Offline state could not be serialized.                                      |
+| `offline.queue_persistence_unconfirmed` | A local write was not confirmed. Read local state before you write again.   |
+| `offline.queue_acceptance_unconfirmed`  | The outcome of a queued write could not be confirmed. Reconcile first.      |
+| `offline.queue_effect_unconfirmed`      | The server accepted the write, but local cleanup was not confirmed.         |
+| `offline.queue_transport_unavailable`   | The transport is down. The queue owns the retry.                            |
+| `offline.idempotency_store_unconfirmed` | The database did not confirm the first answer was cached; it may be saved. Never run the completed handler again. |
+
+`queue.enqueue()` returns a receipt or a failure. `queue.drain()` returns nothing or a failure. See [Enqueue outcomes](#enqueue-outcomes).
+
+## Limits
+
+- A replayed write can run twice. Every queued procedure must be safe to run twice with the same result.
+- The retry schedule defaults to exponential from 1 s to 30 s, at most 5 retries. Then the write moves to the dead-letter list.
+- A queued write replays only under the account that made it. A different account dead-letters it as `ACTOR_MISMATCH`.
+- `./query`, `./mutations`, `./preset`, `./status` and `./devtools` are web-only. On React Native only `./collections` and the server side of `./orpc` apply.
+- `./pwa` runs in a browser service worker only.
+- On the server, `offline.Provider` makes a fresh unpersisted query client for each request.
+
+## Observability
+
+Spans (OpenTelemetry API only; nothing is exported until the app configures an SDK):
+
+| Span | When | Attributes |
+| --- | --- | --- |
+| `offline.queue.enqueue` | each queued mutation | `failure.code` on failure |
+| `offline.queue.drain` | each drain of the queue | `failure.code` on failure |
+| `offline.queue.retry`, `offline.queue.discard` | each retry or discard of a dead-lettered mutation | `failure.code` on failure |
+| `offline.storage.read`, `offline.storage.write`, `offline.storage.clear` | each read, write or clear of the stored queue | `failure.code` on failure |
+| `offline.actor.read`, `offline.actor.remember`, `offline.actor.forget` | each read or change of the stored actor | `failure.code` on failure |
+| `offline.dead_letter.list`, `offline.dead_letter.add`, `offline.dead_letter.remove` | each dead-letter operation | `failure.code` on failure |
+| `offline.idempotency.store` | each server-side idempotency cache write (`@arki/offline/orpc`) | `failure.code` on failure |
+
+Each span is a child of the active span. Ids, inputs, actors and causes are never attributes. A reporter fault cannot suppress or repeat a mutation.
+
+Metrics: none.
+
+Not instrumented: query-cache persistence to IndexedDB (`@arki/offline/query`), collections, the PWA service-worker strategies and the status hooks — they have no span yet; the RPC calls a drain replays are spanned by the app's oRPC client.
+
+## Documentation
+
+- [API reference](docs/api.md): every export, by import path.
+- [Agent guide](docs/agent-guide.md): the model, the task map, the rules and the errors.
+- [Design doc](docs/2026-05-16-arki-offline-design.md): the architecture and the decisions.
+- [Upgrade notes](docs/upgrades/idempotency-writes.md): the idempotency write change.
+- [llms.txt](llms.txt): the import map for agents.
+
+## Support
+
+Questions and bugs: <https://github.com/arki-labs/arki/issues>. Include the package version, the browser or runtime, and the failure `code`.

@@ -1,6 +1,6 @@
 {
   "package": "@arki/offline",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "entries": [
     {
       "subpath": "./collections",
@@ -76,8 +76,8 @@
       "subpath": "./mutations",
       "name": "DeadLetterEntry",
       "kind": "type",
-      "signature": "export type DeadLetterEntry = z.output<typeof deadLetterEntrySchema>;",
-      "jsdocSummary": ""
+      "signature": "export type DeadLetterEntry = { mutation: QueuedMutation; error: { message: string; name: string; }; deadLetteredAt: number; };",
+      "jsdocSummary": "A dead-lettered mutation, why it failed, and when. `deadLetterEntrySchema` (`model-schemas.ts`) checks it."
     },
     {
       "subpath": "./mutations",
@@ -118,8 +118,8 @@
       "subpath": "./mutations",
       "name": "EnqueueReceipt",
       "kind": "type",
-      "signature": "export type EnqueueReceipt = z.output<typeof enqueueReceiptSchema>;",
-      "jsdocSummary": ""
+      "signature": "export type EnqueueReceipt = { idempotencyKey: MutationIdempotencyKey; status: 'queued' | 'sent' | 'dead-letter'; };",
+      "jsdocSummary": "What `enqueue` answers: the mutation's idempotency key and where it went."
     },
     {
       "subpath": "./mutations",
@@ -202,8 +202,8 @@
       "subpath": "./mutations",
       "name": "QueuedMutation",
       "kind": "type",
-      "signature": "export type QueuedMutation = z.output<typeof queuedMutationSchema>;",
-      "jsdocSummary": ""
+      "signature": "export type QueuedMutation = { id: QueuedMutationId; idempotencyKey: MutationIdempotencyKey; procedurePath: readonly string[]; input: unknown; actorId: string | null; enqueuedAt: number; attempts: number; lastError?: { code: QueueErrorCode; message: string; } | undefined; };",
+      "jsdocSummary": "One mutation waiting in the queue, as it is stored."
     },
     {
       "subpath": "./mutations",
@@ -237,8 +237,8 @@
       "subpath": "./mutations",
       "name": "QueueErrorCode",
       "kind": "type",
-      "signature": "export type QueueErrorCode = NonNullable<QueuedMutation['lastError']>['code'];",
-      "jsdocSummary": ""
+      "signature": "export type QueueErrorCode = 'RETRY' | 'MAX_RETRIES' | 'ACTOR_MISMATCH';",
+      "jsdocSummary": "Why a queued mutation last failed."
     },
     {
       "subpath": "./mutations",
@@ -587,7 +587,7 @@
       "subpath": "./query",
       "name": "CreatePersistedQueryClientOptions",
       "kind": "type",
-      "signature": "export type CreatePersistedQueryClientOptions = { /** * The key used to store the persisted QueryClient cache in IndexedDB. * @default 'arki-offline-query' */ storageKey?: string; /** * Maximum age of the persisted cache in milliseconds. Caches older than * this will be discarded on restore. * @default 86_400_000 (24 hours) */ maxAge?: number; /** * A buster string that, when changed, invalidates any previously persisted * cache. Defaults to `import.meta.env.VITE_BUILD_ID` so a new deploy * automatically busts stale caches. * @default import.meta.env.VITE_BUILD_ID ?? '' */ buster?: string; /** * Default options forwarded to the QueryClient constructor. */ defaultOptions?: DefaultOptions; };",
+      "signature": "export type CreatePersistedQueryClientOptions = { /** * The key used to store the persisted QueryClient cache in IndexedDB. * @default 'arki-offline-query' */ storageKey?: string; /** * Maximum age of the persisted cache in milliseconds. Caches older than * this will be discarded on restore. * @default 86_400_000 (24 hours) */ maxAge?: number; /** * A buster string that, when changed, invalidates any previously persisted * cache. Defaults to `import.meta.env.VITE_BUILD_ID` so a new deploy * automatically busts stale caches. Outside Vite (no `import.meta.env`) it is `''`. * @default import.meta.env?.VITE_BUILD_ID ?? '' */ buster?: string; /** * Default options forwarded to the QueryClient constructor. */ defaultOptions?: DefaultOptions; };",
       "jsdocSummary": ""
     },
     {

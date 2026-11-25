@@ -45,11 +45,15 @@ export function createOfflineMutationQueue(options) {
     const dlStore = createDeadLetterStore(deadLetterStorageKey);
     const listeners = new Set();
     const state = { sending: false, queuedCount: 0, deadLetteredCount: 0, failure: null };
-    // IDB access is browser-only. The factory may be evaluated during SSR
+    // IDB exists only in browsers. The factory may be evaluated during SSR
     // (e.g. when an app constructs the runtime at module top level) — in that
     // case the resulting queue is a transient stub that no caller ever uses
     // before the request ends, so skipping the bootstrap reads is safe.
-    const isBrowser = typeof window !== 'undefined';
+    // Test for IndexedDB itself, not `window`: React Native sets `window = global`
+    // and has no IndexedDB. There every storage call returns
+    // `offline.queue_storage_unavailable`; React Native apps queue writes with
+    // `@tanstack/offline-transactions/react-native` instead.
+    const hasIndexedDb = typeof indexedDB !== 'undefined';
     function reportOutcome(result) {
         if (isFailure(result))
             emit({ type: 'failure', failure: result });
@@ -58,7 +62,7 @@ export function createOfflineMutationQueue(options) {
         emit({ type: 'failure', failure: UnexpectedDefect({ cause: error }) });
     }
     // Sync counts on startup (fire-and-forget; acceptable startup race)
-    if (isBrowser) {
+    if (hasIndexedDb) {
         void storage.read().then((items) => {
             if (isFailure(items))
                 emit({ type: 'failure', failure: items });
@@ -74,7 +78,7 @@ export function createOfflineMutationQueue(options) {
     }
     // Keep dead-letter count in sync whenever the dead-letter store changes.
     // The subscribe callback only fires after `dlStore.add` succeeded, so by
-    // definition IDB was reachable — no `isBrowser` guard needed here.
+    // definition IDB was reachable — no `hasIndexedDb` guard needed here.
     const unsubscribeDL = dlStore.subscribe(() => {
         void dlStore.list().then((items) => {
             if (isFailure(items))

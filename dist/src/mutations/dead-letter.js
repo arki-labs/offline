@@ -1,13 +1,7 @@
-import { z } from '@arki/contracts';
 import { isFailure } from '@arki/failure';
-import { queuedMutationSchema } from './model.js';
-import { readOfflineState, writeOfflineState } from './storage.js';
+import { deadLetterEntrySchema } from './model-schemas.js';
+import { readOfflineState, writeOfflineState } from './state.js';
 import { observeQueue } from './telemetry.js';
-const deadLetterEntrySchema = z.object({
-    mutation: queuedMutationSchema,
-    error: z.object({ message: z.string(), name: z.string() }),
-    deadLetteredAt: z.number().finite(),
-});
 export function createDeadLetterStore(storageKey) {
     const listeners = new Set();
     const readAll = () => readOfflineState(storageKey, deadLetterEntrySchema.array(), []);

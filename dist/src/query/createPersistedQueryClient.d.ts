@@ -17,8 +17,8 @@ export type CreatePersistedQueryClientOptions = {
     /**
      * A buster string that, when changed, invalidates any previously persisted
      * cache. Defaults to `import.meta.env.VITE_BUILD_ID` so a new deploy
-     * automatically busts stale caches.
-     * @default import.meta.env.VITE_BUILD_ID ?? ''
+     * automatically busts stale caches. Outside Vite (no `import.meta.env`) it is `''`.
+     * @default import.meta.env?.VITE_BUILD_ID ?? ''
      */
     buster?: string;
     /**

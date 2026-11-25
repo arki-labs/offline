@@ -1,30 +1,23 @@
-import { z } from '@arki/contracts';
-export declare const queuedMutationSchema: z.ZodObject<{
-    id: z.core.$ZodBranded<z.ZodTemplateLiteral<string>, "offline.queued-mutation", "out">;
-    idempotencyKey: z.core.$ZodBranded<z.ZodTemplateLiteral<string>, "offline.mutation-idempotency-key", "out">;
-    procedurePath: z.ZodReadonly<z.ZodArray<z.ZodString>>;
-    input: z.ZodUnknown;
-    actorId: z.ZodNullable<z.ZodString>;
-    enqueuedAt: z.ZodNumber;
-    attempts: z.ZodNumber;
-    lastError: z.ZodOptional<z.ZodObject<{
-        code: z.ZodEnum<{
-            ACTOR_MISMATCH: "ACTOR_MISMATCH";
-            MAX_RETRIES: "MAX_RETRIES";
-            RETRY: "RETRY";
-        }>;
-        message: z.ZodString;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
-export type QueuedMutation = z.output<typeof queuedMutationSchema>;
-export type QueueErrorCode = NonNullable<QueuedMutation['lastError']>['code'];
-export declare const enqueueReceiptSchema: z.ZodObject<{
-    idempotencyKey: z.core.$ZodBranded<z.ZodTemplateLiteral<string>, "offline.mutation-idempotency-key", "out">;
-    status: z.ZodEnum<{
-        "dead-letter": "dead-letter";
-        queued: "queued";
-        sent: "sent";
-    }>;
-}, z.core.$strip>;
-export type EnqueueReceipt = z.output<typeof enqueueReceiptSchema>;
+import type { MutationIdempotencyKey, QueuedMutationId } from './identity.js';
+/** Why a queued mutation last failed. */
+export type QueueErrorCode = 'RETRY' | 'MAX_RETRIES' | 'ACTOR_MISMATCH';
+/** One mutation waiting in the queue, as it is stored. */
+export type QueuedMutation = {
+    id: QueuedMutationId;
+    idempotencyKey: MutationIdempotencyKey;
+    procedurePath: readonly string[];
+    input: unknown;
+    actorId: string | null;
+    enqueuedAt: number;
+    attempts: number;
+    lastError?: {
+        code: QueueErrorCode;
+        message: string;
+    } | undefined;
+};
+/** What `enqueue` answers: the mutation's idempotency key and where it went. */
+export type EnqueueReceipt = {
+    idempotencyKey: MutationIdempotencyKey;
+    status: 'queued' | 'sent' | 'dead-letter';
+};
 //# sourceMappingURL=model.d.ts.map

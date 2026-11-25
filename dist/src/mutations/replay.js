@@ -253,16 +253,17 @@ export function createReplayLoop(options) {
     return {
         start() {
             stopController = new AbortController();
-            if (typeof window !== 'undefined') {
-                window.addEventListener('online', handleOnline);
-                window.addEventListener('offline', handleOffline);
+            // Test the feature, not `window`: React Native sets `window = global` without events.
+            if (typeof globalThis.addEventListener === 'function') {
+                globalThis.addEventListener('online', handleOnline);
+                globalThis.addEventListener('offline', handleOffline);
             }
         },
         stop() {
             stopController.abort();
-            if (typeof window !== 'undefined') {
-                window.removeEventListener('online', handleOnline);
-                window.removeEventListener('offline', handleOffline);
+            if (typeof globalThis.removeEventListener === 'function') {
+                globalThis.removeEventListener('online', handleOnline);
+                globalThis.removeEventListener('offline', handleOffline);
             }
         },
         drainNow() {

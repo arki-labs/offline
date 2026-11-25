@@ -26,7 +26,7 @@ const DEFAULT_MAX_AGE_MS = 1000 * 60 * 60 * 24; // 24 hours
 export function createPersistedQueryClient(options = {}) {
     const { storageKey = DEFAULT_STORAGE_KEY, maxAge = DEFAULT_MAX_AGE_MS, 
     // eslint-disable-next-line turbo/no-undeclared-env-vars -- VITE_BUILD_ID is inlined by Vite at build time, not read from the Turbo env
-    buster = import.meta.env.VITE_BUILD_ID ?? '', defaultOptions, } = options;
+    buster = import.meta.env?.VITE_BUILD_ID ?? '', defaultOptions, } = options;
     const queryClient = new QueryClient({
         defaultOptions: {
             ...defaultOptions,
